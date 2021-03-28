@@ -1,0 +1,48 @@
+package org.itstep.domain.dao.Impl;
+
+import org.itstep.App1;
+import org.itstep.domain.dao.UserDao;
+import org.itstep.domain.entity.User;
+import org.itstep.repository.UserRepository;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+
+
+import javax.persistence.PersistenceContext;
+import java.util.List;
+
+public class UserDaoImpl implements UserDao {
+
+    public final ConfigurableApplicationContext context = SpringApplication.run(App1.class);
+    private UserRepository userRepository = context.getBean(UserRepository.class);
+
+    @Override
+    public void save(User entity) {
+        userRepository.save(entity);
+    }
+
+    @Override
+    public User findById(Integer integer) {
+        return userRepository.findUserByUserId(integer);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User update(User entity) {
+        return userRepository.saveAndFlush(entity);
+    }
+
+    @Override
+    public void delete(User entity) {
+        userRepository.delete(userRepository.findUserByUserId(entity.getUserId()));
+    }
+
+    @Override
+    public User findUserByUserId(Integer id) {
+        return userRepository.findUserByUserId(id);
+    }
+}

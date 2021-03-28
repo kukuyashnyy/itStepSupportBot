@@ -5,11 +5,12 @@ import org.apache.log4j.Logger;
 import org.itstep.telegrambot.Bot;
 import org.itstep.telegrambot.service.MessageReceiver;
 import org.itstep.telegrambot.service.MessageSender;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
-
+@SpringBootApplication
 public class App1
 {
     public static final Logger log = Logger.getLogger(App1.class);
@@ -18,6 +19,7 @@ public class App1
 
     public static void main( String[] args )
     {
+
         System.getProperties().put( "proxySet", "true" );
 
         log.info("Start bot");

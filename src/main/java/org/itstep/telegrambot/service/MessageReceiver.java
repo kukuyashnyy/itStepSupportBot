@@ -5,10 +5,7 @@ import org.itstep.telegrambot.Bot;
 import org.itstep.telegrambot.command.Command;
 import org.itstep.telegrambot.command.ParsedCommand;
 import org.itstep.telegrambot.command.Parser;
-import org.itstep.telegrambot.handler.AbstractHandler;
-import org.itstep.telegrambot.handler.DefaultHandler;
-import org.itstep.telegrambot.handler.NotifyHandler;
-import org.itstep.telegrambot.handler.SystemHandler;
+import org.itstep.telegrambot.handler.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -81,6 +78,10 @@ public class MessageReceiver implements Runnable{
                 NotifyHandler notifyHandler = new NotifyHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + notifyHandler);
                 return notifyHandler;
+            case REGISTER:
+                RegisterHandler registerHandler = new RegisterHandler(bot);
+                log.info("Handler for command[" + command.toString() + "] is: " + registerHandler);
+                return registerHandler;
             default:
                 log.info("Handler for command[" + command.toString() + "] not Set. Return DefaultHandler");
                 return new DefaultHandler(bot);
