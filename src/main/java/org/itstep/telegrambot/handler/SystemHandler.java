@@ -26,11 +26,10 @@ public class SystemHandler extends AbstractHandler{
             case HELP:
                 bot.sendQueue.add(getMessageHelp(chatId));
                 break;
-            case ID:
-                return "Your telegramID: " + update.getMessage().getFrom().getId() + END_LINE +
-                        "Your first name: " + update.getMessage().getFrom().getFirstName() + END_LINE +
-                        "Your last name: " + update.getMessage().getFrom().getLastName() + END_LINE +
-                        "Your user name: " + update.getMessage().getFrom().getUserName();
+            case ABOUTME:
+                return bot.userDao.findUserById(update.getMessage().getFrom().getId()).toString();
+            case USERS:
+                return bot.userDao.findAll().toString();
         }
         return "";
     }

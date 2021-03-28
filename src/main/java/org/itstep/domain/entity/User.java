@@ -17,7 +17,7 @@ public class User {
     private Integer id;
     @NonNull
     private Integer userId;
-    @NonNull
+
     private String userName;
 
     private String firstName;
@@ -29,5 +29,4 @@ public class User {
     private boolean isAdmin = false;
 
     private boolean isMaster = false;
-
 }

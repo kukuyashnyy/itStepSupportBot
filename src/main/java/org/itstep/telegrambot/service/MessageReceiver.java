@@ -70,7 +70,8 @@ public class MessageReceiver implements Runnable{
         switch (command) {
             case START:
             case HELP:
-            case ID:
+            case USERS:
+            case ABOUTME:
                 SystemHandler systemHandler = new SystemHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + systemHandler);
                 return systemHandler;
