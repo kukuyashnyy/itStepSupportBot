@@ -51,7 +51,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public boolean isUser(Integer id) {
-        if (isExist(id)) return findById(id).isUser();
+        if (isExist(id)) return (findById(id).isUser() && !isAdmin(id) && !isMaster(id));
         return false;
     }
 
@@ -72,4 +72,10 @@ public class UserDaoImpl implements UserDao {
         user.setUser(true);
         return userRepository.saveAndFlush(user);
     }
+
+    @Override
+    public List<User> findAllNotAuthorized() {
+        return userRepository.findAllByIsUserIsFalseAndIsAdminIsFalseAndIsMasterIsFalse();
+    }
+
 }

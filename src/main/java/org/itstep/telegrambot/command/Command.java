@@ -3,5 +3,6 @@ package org.itstep.telegrambot.command;
 public enum Command {
     NONE, NOTFORME,
 
-    NOTIFY, START, HELP, ABOUTME, REGISTER, USERS
+    REGISTER, REGISTER_USER, REGISTER_ADMIN,
+    NOTIFY, START, HELP, ABOUT_ME, USERS, TICKET
 }

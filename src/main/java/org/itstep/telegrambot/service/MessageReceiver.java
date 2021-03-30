@@ -9,7 +9,7 @@ import org.itstep.telegrambot.handler.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-public class MessageReceiver implements Runnable{
+public class MessageReceiver implements Runnable {
     private static final Logger log = Logger.getLogger(MessageReceiver.class);
     private final int WAIT_FOR_NEW_MESSAGE_DELAY = 1000;
     private Bot bot;
@@ -50,7 +50,7 @@ public class MessageReceiver implements Runnable{
         String inputText = update.getMessage().getText();
 
         ParsedCommand parsedCommand = parser.getParsedCommand(inputText);
-        AbstractHandler handlerForCommand = getHandlerForCommand(parsedCommand.getCommand());
+        AbstractHandler handlerForCommand = getHandlerForCommand(parsedCommand.getCommand(), update);
 
         String operationResult = handlerForCommand.operate(chatId.toString(), parsedCommand, update);
 
@@ -62,27 +62,38 @@ public class MessageReceiver implements Runnable{
         }
     }
 
-    private AbstractHandler getHandlerForCommand(Command command) {
+    private AbstractHandler getHandlerForCommand(Command command, Update update) {
+        Integer id = update.getMessage().getFrom().getId();
         if (command == null) {
             log.warn("Null command accepted. This is not good scenario.");
             return new DefaultHandler(bot);
         }
+
+
         switch (command) {
             case START:
             case HELP:
             case USERS:
-            case ABOUTME:
+            case ABOUT_ME:
                 SystemHandler systemHandler = new SystemHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + systemHandler);
                 return systemHandler;
-            case NOTIFY:
-                NotifyHandler notifyHandler = new NotifyHandler(bot);
-                log.info("Handler for command[" + command.toString() + "] is: " + notifyHandler);
-                return notifyHandler;
+//            case NOTIFY:
+//                NotifyHandler notifyHandler = new NotifyHandler(bot);
+//                log.info("Handler for command[" + command.toString() + "] is: " + notifyHandler);
+//                return notifyHandler;
             case REGISTER:
                 RegisterHandler registerHandler = new RegisterHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + registerHandler);
                 return registerHandler;
+            case REGISTER_USER:
+                RegisterUserHandler registerUserHandler = new RegisterUserHandler(bot);
+                log.info("Handler for command[" + command.toString() + "] is: " + registerUserHandler);
+                return registerUserHandler;
+            case REGISTER_ADMIN:
+                RegisterAdminHandler registerAdminHandler = new RegisterAdminHandler(bot);
+                log.info("Handler for command[" + command.toString() + "] is: " + registerAdminHandler);
+                return registerAdminHandler;
             default:
                 log.info("Handler for command[" + command.toString() + "] not Set. Return DefaultHandler");
                 return new DefaultHandler(bot);
