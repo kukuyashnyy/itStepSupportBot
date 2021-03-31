@@ -17,9 +17,14 @@ public class RegisterAdminHandler extends AbstractHandler {
     @Override
     public String operate(String chatId, ParsedCommand parsedCommand, Update update) {
         Integer fromUserId = update.getMessage().getFrom().getId();
-        //TODO try for parse
-        Integer id = Integer.parseInt(parsedCommand.getText());
-        String text = "Пользователь: " + update.getMessage().getFrom().getUserName();
+        Integer id;
+        try {
+            id = Integer.parseInt(parsedCommand.getText());
+        } catch (Exception e) {
+            return "Введен не верный user id.";
+        }
+
+        String text = "Пользователь с id " + update.getMessage().getFrom().getId();
 
         String response;
         if (bot.userDao.isMaster(fromUserId)) {
@@ -33,7 +38,7 @@ public class RegisterAdminHandler extends AbstractHandler {
                     return text + " уже зарегистрирован, как администратор.";
                 }
             } else {
-                return text + "не найден.";
+                return text + " не найден.";
             }
         } else {
             return "Извините, вы не можете воспользоваться данной командой.";

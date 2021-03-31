@@ -17,7 +17,12 @@ public class RegisterUserHandler extends AbstractHandler {
     @Override
     public String operate(String chatId, ParsedCommand parsedCommand, Update update) {
         Integer fromUserId = update.getMessage().getFrom().getId();
-        Integer id = Integer.parseInt(parsedCommand.getText());
+        Integer id;
+        try {
+            id = Integer.parseInt(parsedCommand.getText());
+        } catch (Exception e) {
+            return "Введен не верный user id.";
+        }
         String text = "Пользователь c id: " + id + ",";
 
         String response;
