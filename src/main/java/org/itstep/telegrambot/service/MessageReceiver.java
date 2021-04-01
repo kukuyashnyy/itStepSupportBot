@@ -40,14 +40,18 @@ public class MessageReceiver implements Runnable {
     private void analyze(Object object) {
         if (object instanceof Update) {
             Update update = (Update) object;
-            log.debug("Update recieved: " + update.toString());
-            analyzeForUpdateType(update);
+            log.info("Update recieved: " + update.toString());
+            if (update.getMessage() != null) {
+                analyzeForUpdateType(update);
+            }
         } else log.warn("Cant operate type of object: " + object.toString());
     }
 
     private void analyzeForUpdateType(Update update) {
+
         Long chatId = update.getMessage().getChatId();
         String inputText = update.getMessage().getText();
+
 
         ParsedCommand parsedCommand = parser.getParsedCommand(inputText);
         AbstractHandler handlerForCommand = getHandlerForCommand(parsedCommand.getCommand(), update);
@@ -63,7 +67,12 @@ public class MessageReceiver implements Runnable {
     }
 
     private AbstractHandler getHandlerForCommand(Command command, Update update) {
-        Integer id = update.getMessage().getFrom().getId();
+        try {
+            Integer id = update.getMessage().getFrom().getId();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
         if (command == null) {
             log.warn("Null command accepted. This is not good scenario.");
             return new DefaultHandler(bot);
