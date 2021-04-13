@@ -40,7 +40,7 @@ public class MessageReceiver implements Runnable {
     private void analyze(Object object) {
         if (object instanceof Update) {
             Update update = (Update) object;
-            log.info("Update recieved: " + update.toString());
+//            log.info("Update recieved: " + update.toString());
             if (update.getMessage() != null) {
                 analyzeForUpdateType(update);
             }
@@ -84,6 +84,8 @@ public class MessageReceiver implements Runnable {
             case HELP:
             case USERS:
             case ABOUT_ME:
+            case SEND_TO_CHANNEL:
+            case SEND_TO_DISCUSS:
                 SystemHandler systemHandler = new SystemHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + systemHandler);
                 return systemHandler;
@@ -91,6 +93,11 @@ public class MessageReceiver implements Runnable {
 //                NotifyHandler notifyHandler = new NotifyHandler(bot);
 //                log.info("Handler for command[" + command.toString() + "] is: " + notifyHandler);
 //                return notifyHandler;
+            case TICKET:
+            case CLOSE_TICKET:
+                TicketHandler ticketHandler = new TicketHandler(bot);
+                log.info("Handler for command[" + command.toString() + "] is: " + ticketHandler);
+                return ticketHandler;
             case REGISTER:
                 RegisterHandler registerHandler = new RegisterHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + registerHandler);

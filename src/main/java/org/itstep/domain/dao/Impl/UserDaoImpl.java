@@ -49,18 +49,21 @@ public class UserDaoImpl implements UserDao {
         return (findUserById(id) != null);
     }
 
+    //TODO Добавить отдельные запросы в базу, проверить на налл
     @Override
     public boolean isUser(Integer id) {
         if (isExist(id)) return (findById(id).isUser() && !isAdmin(id) && !isMaster(id));
         return false;
     }
 
+    //TODO Добавить отдельные запросы в базу, проверить на налл
     @Override
     public boolean isAdmin(Integer id) {
         if (isExist(id)) return findUserById(id).isAdmin() || isMaster(id);
         return false;
     }
 
+    //TODO Добавить отдельные запросы в базу, проверить на налл
     @Override
     public boolean isMaster(Integer id) {
         return findUserById(id).isMaster();

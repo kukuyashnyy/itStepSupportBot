@@ -1,7 +1,9 @@
 package org.itstep.telegrambot;
 
 import org.apache.log4j.Logger;
+import org.itstep.domain.dao.Impl.TicketDaoImpl;
 import org.itstep.domain.dao.Impl.UserDaoImpl;
+import org.itstep.domain.entity.Ticket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -18,6 +20,7 @@ public class Bot extends TelegramLongPollingBot {
     public final Queue<Object> receiveQueue = new ConcurrentLinkedQueue<>();
 
     public final UserDaoImpl userDao = new UserDaoImpl();
+    public final TicketDaoImpl ticketDao = new TicketDaoImpl();
 
     private final String BOT_TOKEN = System.getenv("bot_token");
     private final String BOT_NAME = System.getenv("bot_name");
