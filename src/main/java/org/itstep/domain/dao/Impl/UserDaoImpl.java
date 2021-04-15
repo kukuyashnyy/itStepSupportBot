@@ -49,24 +49,39 @@ public class UserDaoImpl implements UserDao {
         return (findUserById(id) != null);
     }
 
-    //TODO Добавить отдельные запросы в базу, проверить на налл
     @Override
     public boolean isUser(Integer id) {
-        if (isExist(id)) return (findById(id).isUser() && !isAdmin(id) && !isMaster(id));
+        if (isExist(id)) {
+            User user = findById(id);
+            return (user.isUser() & user.isAdmin() & user.isMaster());
+        }
         return false;
     }
 
-    //TODO Добавить отдельные запросы в базу, проверить на налл
     @Override
     public boolean isAdmin(Integer id) {
-        if (isExist(id)) return findUserById(id).isAdmin() || isMaster(id);
+        if (isExist(id)) {
+            User user = findUserById(id);
+            return user.isAdmin() | user.isMaster();
+        }
         return false;
     }
 
-    //TODO Добавить отдельные запросы в базу, проверить на налл
     @Override
     public boolean isMaster(Integer id) {
-        return findUserById(id).isMaster();
+        if (isExist(id)) {
+            return findUserById(id).isMaster();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isRegistered(Integer id) {
+        if (isExist(id)) {
+            User user = findById(id);
+            return (user.isUser() | user.isAdmin() | user.isMaster());
+        }
+        return false;
     }
 
     @Override

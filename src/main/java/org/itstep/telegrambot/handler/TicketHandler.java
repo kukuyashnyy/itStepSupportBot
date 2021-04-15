@@ -20,33 +20,35 @@ public class TicketHandler extends AbstractHandler{
         super(bot);
     }
 
-    //TODO проверка зарегистрированого пользователя
-
     @Override
     public String operate(String chatId, ParsedCommand parsedCommand, Update update) {
         Command command = parsedCommand.getCommand();
         Integer userId = update.getMessage().getFrom().getId();
-        Ticket ticket = bot.ticketDao.
-                findByUserIdAndOpenedAndNotClosed(userId);
-        switch (command) {
-            case TICKET:
-                if (ticket == null) {
-                    bot.sendQueue.add(getMessageStartTicket(chatId, userId));
-                } else {
-                    bot.sendQueue.add(getMessageTicketIsExist(chatId));
-                }
-                break;
+        Ticket ticket;
+        if(bot.userDao.isRegistered(userId)) {
+            ticket = bot.ticketDao.findByUserIdAndOpenedAndNotClosed(userId);
+            switch (command) {
+                case TICKET:
+                    if (ticket == null) {
+                        bot.sendQueue.add(getMessageStartTicket(chatId, userId));
+                    } else {
+                        bot.sendQueue.add(getMessageTicketIsExist(chatId));
+                    }
+                    break;
 
-            case CLOSE_TICKET:
-                if (ticket == null) {
-                    bot.sendQueue.add(getMessageTicketNotExist(chatId));
-                } else {
-                    ticket.setClosed(true);
-                    bot.ticketDao.update(ticket);
-                    bot.sendQueue.add(getMessageCloseTicketToChannel(userId));
-                    bot.sendQueue.add(getMessageCloseTicketToUser(chatId));
-                }
-                break;
+                case CLOSE_TICKET:
+                    if (ticket == null) {
+                        bot.sendQueue.add(getMessageTicketNotExist(chatId));
+                    } else {
+                        ticket.setClosed(true);
+                        bot.ticketDao.update(ticket);
+                        bot.sendQueue.add(getMessageCloseTicketToChannel(userId));
+                        bot.sendQueue.add(getMessageCloseTicketToUser(chatId));
+                    }
+                    break;
+            }
+        } else {
+            bot.sendQueue.add(getMessageNotRegistered(update.getMessage().getChatId().toString()));
         }
         return "";
     }
@@ -109,6 +111,12 @@ public class TicketHandler extends AbstractHandler{
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText("Ваше обращение было закрыто.");
+        return message;
+    }
+    private SendMessage getMessageNotRegistered(String chatId) {
+        SendMessage message = new SendMessage();
+        message.setText("Только зарегистрированные пользователи могут создавать или закрывать обращения.");
+        message.setChatId(chatId);
         return message;
     }
 }

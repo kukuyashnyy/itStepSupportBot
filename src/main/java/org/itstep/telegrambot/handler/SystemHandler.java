@@ -70,7 +70,8 @@ public class SystemHandler extends AbstractHandler {
         return "";
     }
 
-    //TODO Добавить в хелп закрытие тикета
+    //TODO проверить отображение команд
+
     private SendMessage getMessageHelp(String chatID, Integer id) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatID);
@@ -82,6 +83,7 @@ public class SystemHandler extends AbstractHandler {
         text.append("[/help](/help) - показать список команд").append(END_LINE);
         if (bot.userDao.isUser(id)) {
             text.append("[/ticket](/ticket) - создать обращение").append(END_LINE);
+            text.append("[/close_ticket](/close_ticket) - закрыть обращение").append(END_LINE);
         }
         if (bot.userDao.isExist(id)) {
 //            if (bot.userDao.isUser(id) && !bot.userDao.isAdmin(id) && !bot.userDao.isMaster(id))

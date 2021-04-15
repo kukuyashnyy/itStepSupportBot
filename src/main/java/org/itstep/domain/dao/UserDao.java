@@ -11,6 +11,7 @@ public interface UserDao extends Dao<User, Integer> {
     boolean isUser(Integer id);
     boolean isAdmin(Integer id);
     boolean isMaster(Integer id);
+    boolean isRegistered(Integer id);
     User setAsUser(Integer id);
     List<User> findAllNotAuthorized();
 }
