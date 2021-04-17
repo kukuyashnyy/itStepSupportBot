@@ -1,18 +1,21 @@
 package org.itstep.domain.dao.Impl;
 
-import org.itstep.App1;
 import org.itstep.domain.dao.UserDao;
 import org.itstep.domain.entity.User;
 import org.itstep.repository.UserRepository;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class UserDaoImpl implements UserDao {
 
-    public final ConfigurableApplicationContext context = SpringApplication.run(App1.class);
-    private UserRepository userRepository = context.getBean(UserRepository.class);
+    private final UserRepository userRepository;
+    @Autowired
+    public UserDaoImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public void save(User entity) {

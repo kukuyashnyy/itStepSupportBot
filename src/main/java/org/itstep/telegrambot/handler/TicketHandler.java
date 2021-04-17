@@ -8,6 +8,7 @@ import org.itstep.telegrambot.command.ParsedCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 
 public class TicketHandler extends AbstractHandler{
 
@@ -30,7 +31,7 @@ public class TicketHandler extends AbstractHandler{
             switch (command) {
                 case TICKET:
                     if (ticket == null) {
-                        bot.sendQueue.add(getMessageStartTicket(chatId, userId));
+                        bot.sendQueue.add(getMessageStartTicket(chatId, update.getMessage().getFrom()));
                     } else {
                         bot.sendQueue.add(getMessageTicketIsExist(chatId));
                     }
@@ -42,7 +43,7 @@ public class TicketHandler extends AbstractHandler{
                     } else {
                         ticket.setClosed(true);
                         bot.ticketDao.update(ticket);
-                        bot.sendQueue.add(getMessageCloseTicketToChannel(userId));
+                        bot.sendQueue.add(getMessageCloseTicketToChannel(ticket));
                         bot.sendQueue.add(getMessageCloseTicketToUser(chatId));
                     }
                     break;
@@ -68,22 +69,44 @@ public class TicketHandler extends AbstractHandler{
         message.setText(text.toString());
         return message;
     }
-    private SendMessage getMessageStartTicket(String chatId, Integer userId) {
+    private SendMessage getMessageStartTicket(String chatId, User user) {
         SendMessage messageToChannel = new SendMessage();
         messageToChannel.setChatId(this.CHANNEL_ID);
-        messageToChannel.setText("New ticked from: " + userId);
+        StringBuilder textToChanel = new StringBuilder();
 
+        textToChanel.append("Обращение от пользователя: ");
+        textToChanel.append(END_LINE);
+        textToChanel.append("User ID: " + user.getId());
+        textToChanel.append(END_LINE);
+        if (user.getFirstName() != null) {
+            textToChanel.append("Имя: " + user.getFirstName());
+            textToChanel.append(END_LINE);
+        }
+        if (user.getLastName() != null) {
+            textToChanel.append("Фамилия: " + user.getLastName());
+            textToChanel.append(END_LINE);
+        }
+
+        messageToChannel.setText(textToChanel.toString());
+
+        StringBuilder textToUser = new StringBuilder();
         SendMessage messageToUser = new SendMessage();
         messageToUser.setChatId(chatId);
 
         try {
             Message response = bot.execute(messageToChannel);
-            createTicket(response, userId);
+
+            createTicket(response, user.getId());
+            textToUser.append("Ваше обращение успешно создано.");
+            textToUser.append(END_LINE);
+            textToUser.append("Для начала общения с администратором, напишите в чат.");
+
             messageToUser.setText("Ваше обращение успешно зарегистрировано.");
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-            messageToUser.setText("Ошибка регистрации обращения. Попробуйте еще раз.");
+            textToUser.append("Ошибка регистрации обращения. Попробуйте еще раз.");
         }
+        messageToUser.setText(textToUser.toString());
         return messageToUser;
     }
     private void createTicket(Message message, Integer userId) {
@@ -100,11 +123,11 @@ public class TicketHandler extends AbstractHandler{
         message.setText("У вас нет активного обращения.");
         return message;
     }
-    private SendMessage getMessageCloseTicketToChannel(Integer userId) {
+    private SendMessage getMessageCloseTicketToChannel(Ticket ticket) {
         SendMessage commentMessage = new SendMessage();
         commentMessage.setChatId(GROUP_ID);
-        commentMessage.setText("User: " + userId + " close ticket.");
-        commentMessage.setReplyToMessageId(bot.ticketDao.findByUserId(userId).getMessageToId());
+        commentMessage.setText("Пользователь закрыл обращение.");
+        commentMessage.setReplyToMessageId(ticket.getMessageToId());
         return commentMessage;
     }
     private SendMessage getMessageCloseTicketToUser(String chatId) {

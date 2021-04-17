@@ -77,22 +77,23 @@ public class SystemHandler extends AbstractHandler {
         sendMessage.setChatId(chatID);
         sendMessage.enableMarkdown(true);
 
+        User user = bot.userDao.findById(id);
+
         StringBuilder text = new StringBuilder();
         text.append("*Список команд*").append(END_LINE).append(END_LINE);
         text.append("[/start](/start) - показать стартовое сообщение").append(END_LINE);
         text.append("[/help](/help) - показать список команд").append(END_LINE);
-        if (bot.userDao.isUser(id)) {
-            text.append("[/ticket](/ticket) - создать обращение").append(END_LINE);
-            text.append("[/close_ticket](/close_ticket) - закрыть обращение").append(END_LINE);
-        }
-        if (bot.userDao.isExist(id)) {
-//            if (bot.userDao.isUser(id) && !bot.userDao.isAdmin(id) && !bot.userDao.isMaster(id))
-//                text.append("[/register](/register) - отправить запрос на регистрацию").append(END_LINE);
-            if (bot.userDao.isAdmin(id)) {
+
+        if (user != null) {
+            if (user.isUser()) {
+                text.append("[/ticket](/ticket) - создать обращение").append(END_LINE);
+                text.append("[/close_ticket](/close_ticket) - закрыть обращение").append(END_LINE);
+            }
+            if (user.isAdmin()) {
                 text.append("[/users](/users) - показать список неавторизированых пользователей").append(END_LINE);
                 text.append("[/register_user](/register_user) + user id - зарегистрировать сотрудника").append(END_LINE);
             }
-            if (bot.userDao.isMaster(id)) {
+            if (user.isMaster()) {
                 text.append("[/register_admin](/register_admin) + user id - зарегистрировать администратора").append(END_LINE);
             }
         } else {
@@ -112,28 +113,40 @@ public class SystemHandler extends AbstractHandler {
         sendMessage.setChatId(chatID);
         sendMessage.enableMarkdown(true);
         StringBuilder text = new StringBuilder();
-        text.append("Здравствуйте, я *").append(bot.getBotUsername()).append("*").append(END_LINE);
-        text.append("Я создан для помощи сотрудикам Академии Шаг").append(END_LINE);
+        text.append("Здравствуйте, я ").
+                append("*").
+                append(bot.getBotUsername()).
+                append(".").
+                append("*").
+                append(END_LINE);
+        text.append("Я создан для помощи сотрудикам Академии Шаг.").append(END_LINE);
         text.append("Что бы узнать чем я могу помочь, воспользуйтесь командой [/help](/help)");
         sendMessage.setText(text.toString());
         return sendMessage;
     }
 
-    private SendMessage getMessageAboutMe(String chatID, Integer id) {
+    private SendMessage getMessageAboutMe(String chatID, Integer userId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatID);
         StringBuilder text = new StringBuilder();
 
+        User user = bot.userDao.findUserById(userId);
+
         text.append("Вы ");
-        if (bot.userDao.isExist(id)) {
+        if (user != null) {
             text.append("зарегистрированы как ");
-            if (bot.userDao.isUser(id)) text.append("сотрудник.");
-            if (bot.userDao.isAdmin(id) && !bot.userDao.isMaster(id)) text.append("администратор.");
-            if (bot.userDao.isMaster(id)) text.append("мастер.");
-            if (!bot.userDao.isUser(id) &&
-                    !bot.userDao.isAdmin(id) &&
-                    !bot.userDao.isMaster(id))
+            if (user.isUser()) {
+                text.append("сотрудник.");
+            }
+            if (user.isAdmin() & !user.isMaster()) {
+                text.append("администратор.");
+            }
+            if (user.isMaster()) {
+                text.append("мастер.");
+            }
+            if (!user.isUser() & !user.isAdmin() & !user.isMaster()) {
                 text.append("не авторизированый пользователь.");
+            }
         } else {
             text.append("не зарегистрированы.");
         }

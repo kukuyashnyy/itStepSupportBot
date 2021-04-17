@@ -1,20 +1,21 @@
 package org.itstep.domain.dao.Impl;
 
-import org.itstep.App1;
 import org.itstep.domain.dao.TicketDao;
 import org.itstep.domain.entity.Ticket;
 import org.itstep.repository.TicketRepository;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class TicketDaoImpl implements TicketDao {
 
-    public final ConfigurableApplicationContext context =
-            SpringApplication.run(App1.class);
-    private TicketRepository ticketRepository =
-            context.getBean(TicketRepository.class);
+    private final TicketRepository ticketRepository;
+
+    public TicketDaoImpl(TicketRepository ticketRepository) {
+        this.ticketRepository = ticketRepository;
+    }
+
 
     @Override
     public void save(Ticket entity) {
