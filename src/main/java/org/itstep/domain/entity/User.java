@@ -24,6 +24,9 @@ public class User {
 
     private String lastName;
 
+    //TODO NonNull
+    private String phone;
+
     private boolean isUser = false;
 
     private boolean isAdmin = false;

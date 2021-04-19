@@ -9,7 +9,11 @@ import org.itstep.telegrambot.command.ParsedCommand;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SystemHandler extends AbstractHandler {
@@ -122,6 +126,23 @@ public class SystemHandler extends AbstractHandler {
         text.append("Я создан для помощи сотрудикам Академии Шаг.").append(END_LINE);
         text.append("Что бы узнать чем я могу помочь, воспользуйтесь командой [/help](/help)");
         sendMessage.setText(text.toString());
+
+        //TODO Кнопка регистрации
+//        KeyboardButton keyboardButton = new KeyboardButton();
+//        keyboardButton.setText("Зарегистрироваться");
+//        keyboardButton.setRequestContact(true);
+//
+//        List<KeyboardRow> keyboard = new ArrayList<>();
+//        KeyboardRow keyboardRow = new KeyboardRow();
+//        keyboardRow.add(keyboardButton);
+//        keyboard.add(keyboardRow);
+//
+//        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+//        keyboardMarkup.setResizeKeyboard(true);
+//        keyboardMarkup.setKeyboard(keyboard);
+//
+//        sendMessage.setReplyMarkup(keyboardMarkup);
+
         return sendMessage;
     }
 

@@ -5,6 +5,7 @@ import org.itstep.domain.entity.Ticket;
 import org.itstep.domain.entity.User;
 import org.itstep.telegrambot.Bot;
 import org.itstep.telegrambot.command.ParsedCommand;
+import org.telegram.telegrambots.meta.api.methods.CopyMessage;
 import org.telegram.telegrambots.meta.api.methods.ForwardMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -112,7 +113,8 @@ public class DefaultHandler extends AbstractHandler {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setReplyToMessageId(ticket.getMessageToId());
         sendMessage.setChatId(String.valueOf(GROUP_ID));
-        sendMessage.setText("Данное обращение закрыто пользователем.");
+        sendMessage.enableHtml(true);
+        sendMessage.setText("Bot:" + END_LINE + "<s>Данное обращение закрыто пользователем.</s>");
         return sendMessage;
     }
 
@@ -120,36 +122,26 @@ public class DefaultHandler extends AbstractHandler {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setReplyToMessageId(ticket.getMessageToId());
         sendMessage.setChatId(String.valueOf(GROUP_ID));
-        sendMessage.setText("Вы не можете отправлять сообщения пользователям.");
+        sendMessage.setText("Bot:" + END_LINE + "Вы не можете отправлять сообщения пользователям.");
         return sendMessage;
     }
 
-    private SendMessage getMessageToUser(Update update, Ticket ticket) {
-        SendMessage sendMessage = new SendMessage();
-        if (update.getMessage().getText() != null) {
-            sendMessage.setChatId(ticket.getUserId().toString());
-            sendMessage.setText(update.getMessage().getText());
-        } else {
-            sendMessage.setText("Сообщение не отправленно.");
-            sendMessage.setReplyToMessageId(ticket.getMessageToId());
-            sendMessage.setChatId(String.valueOf(GROUP_ID));
-        }
-
-        return sendMessage;
+    private CopyMessage getMessageToUser(Update update, Ticket ticket) {
+        CopyMessage copyMessage = new CopyMessage();
+        copyMessage.setChatId(ticket.getUserId().toString());
+        copyMessage.setFromChatId(update.getMessage().getChatId().toString());
+        copyMessage.setMessageId(update.getMessage().getMessageId());
+        return copyMessage;
     }
 
-    private SendMessage getMessageToAdmin(Update update, Ticket ticket) {
-        SendMessage sendMessage = new SendMessage();
-        if (update.getMessage().getText() != null) {
-            sendMessage.setText(update.getMessage().getText());
-            sendMessage.setReplyToMessageId(ticket.getMessageToId());
-            sendMessage.setChatId(String.valueOf(GROUP_ID));
-        } else {
-            sendMessage.setText("Сообщение не отправленно.");
-            sendMessage.setChatId(update.getMessage().getChatId().toString());
-        }
+    private CopyMessage getMessageToAdmin(Update update, Ticket ticket) {
+        CopyMessage copyMessage = new CopyMessage();
+        copyMessage.setChatId(String.valueOf(GROUP_ID));
+        copyMessage.setReplyToMessageId(ticket.getMessageToId());
+        copyMessage.setFromChatId(update.getMessage().getChatId().toString());
+        copyMessage.setMessageId(update.getMessage().getMessageId());
 
-        return sendMessage;
+        return copyMessage;
     }
 
     private SendMessage getMessageTicketNotExist(Update update) {
@@ -158,6 +150,8 @@ public class DefaultHandler extends AbstractHandler {
         sendMessage.enableMarkdown(true);
 
         StringBuilder text = new StringBuilder();
+        text.append("Bot:");
+        text.append(END_LINE);
         text.append("Извините, но у вас нет открытых обращений.");
         text.append(END_LINE);
         text.append("Для создания обращения воспользуйтесь коммандой [/ticket](/ticket)");
