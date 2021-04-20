@@ -7,7 +7,10 @@ import org.itstep.telegrambot.command.ParsedCommand;
 import org.itstep.telegrambot.command.Parser;
 import org.itstep.telegrambot.handler.*;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 public class MessageReceiver implements Runnable {
     private static final Logger log = Logger.getLogger(MessageReceiver.class);
@@ -54,7 +57,14 @@ public class MessageReceiver implements Runnable {
 
 
         ParsedCommand parsedCommand = parser.getParsedCommand(inputText);
-        AbstractHandler handlerForCommand = getHandlerForCommand(parsedCommand.getCommand(), update);
+
+        AbstractHandler handlerForCommand;
+
+        if (hasOwnerContact(update)) {
+            handlerForCommand = new RegisterHandler(bot);
+        } else {
+            handlerForCommand = getHandlerForCommand(parsedCommand.getCommand(), update);
+        }
 
         String operationResult = handlerForCommand.operate(chatId.toString(), parsedCommand, update);
 
@@ -62,6 +72,11 @@ public class MessageReceiver implements Runnable {
             SendMessage message = new SendMessage();
             message.setChatId(chatId.toString());
             message.setText(operationResult);
+
+            ReplyKeyboardRemove remove = new ReplyKeyboardRemove();
+            remove.setRemoveKeyboard(true);
+            message.setReplyMarkup(remove);
+
             bot.sendQueue.add(message);
         }
     }
@@ -84,8 +99,8 @@ public class MessageReceiver implements Runnable {
             case HELP:
             case USERS:
             case ABOUT_ME:
-            case SEND_TO_CHANNEL:
-            case SEND_TO_DISCUSS:
+//            case SEND_TO_CHANNEL:
+//            case SEND_TO_DISCUSS:
                 SystemHandler systemHandler = new SystemHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + systemHandler);
                 return systemHandler;
@@ -98,10 +113,10 @@ public class MessageReceiver implements Runnable {
                 TicketHandler ticketHandler = new TicketHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + ticketHandler);
                 return ticketHandler;
-            case REGISTER:
-                RegisterHandler registerHandler = new RegisterHandler(bot);
-                log.info("Handler for command[" + command.toString() + "] is: " + registerHandler);
-                return registerHandler;
+//            case REGISTER:
+//                RegisterHandler registerHandler = new RegisterHandler(bot);
+//                log.info("Handler for command[" + command.toString() + "] is: " + registerHandler);
+//                return registerHandler;
             case REGISTER_USER:
                 RegisterUserHandler registerUserHandler = new RegisterUserHandler(bot);
                 log.info("Handler for command[" + command.toString() + "] is: " + registerUserHandler);
@@ -114,5 +129,14 @@ public class MessageReceiver implements Runnable {
                 log.info("Handler for command[" + command.toString() + "] not Set. Return DefaultHandler");
                 return new DefaultHandler(bot);
         }
+    }
+
+    private Boolean hasOwnerContact(Update update) {
+        User user = update.getMessage().getFrom();
+        Contact contact = update.getMessage().getContact();
+        if (contact != null && user != null) {
+            return user.getId().equals(contact.getUserID());
+        }
+        return false;
     }
 }
