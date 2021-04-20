@@ -24,7 +24,7 @@ public class User {
 
     private String lastName;
 
-    //TODO NonNull
+    @NonNull
     private String phone;
 
     private boolean isUser = false;
