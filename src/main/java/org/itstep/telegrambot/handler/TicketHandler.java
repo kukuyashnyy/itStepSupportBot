@@ -33,7 +33,7 @@ public class TicketHandler extends AbstractHandler {
 
         org.itstep.domain.entity.User user = bot.userDao.findUserById(userId);
 
-        if (user.isUser() || user.isAdmin() || user.isMaster()) {
+        if (user != null && (user.isUser() || user.isAdmin() || user.isMaster())) {
             ticket = bot.ticketDao.findByUserIdAndOpenedAndNotClosed(userId);
             switch (command) {
                 case TICKET:
@@ -123,8 +123,6 @@ public class TicketHandler extends AbstractHandler {
     }
 
     private SendMessage getMessageCloseTicketToChannel(Ticket ticket) {
-//        CopyMessage copyMessage = new CopyMessage();
-//        copyMessage.setFromChatId(CHANNEL_ID);
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<s>");

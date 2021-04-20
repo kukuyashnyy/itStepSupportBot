@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -42,9 +43,9 @@ public class SystemHandler extends AbstractHandler {
                 bot.sendQueue.add(getMessageAboutMe(chatId, update.getMessage().getFrom().getId()));
                 break;
             case USERS:
-                bot.sendQueue.add(getMessageUsers(chatId));
+                bot.sendQueue.add(getMessageUsers(chatId, update.getMessage().getFrom().getId()));
                 break;
-            case SEND_TO_CHANNEL:
+/*            case SEND_TO_CHANNEL:
                 SendMessage message = new SendMessage();
                 message.setChatId(String.valueOf(CHANNEL_ID));
                 message.setText("User id: " + update.getMessage().getFrom().getId().toString());
@@ -60,7 +61,6 @@ public class SystemHandler extends AbstractHandler {
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
-//                bot.sendQueue.add(message);
                 break;
             case SEND_TO_DISCUSS:
                 Integer userId = update.getMessage().getFrom().getId();
@@ -69,7 +69,7 @@ public class SystemHandler extends AbstractHandler {
                 message1.setChatId(String.valueOf(GROUP_ID));
                 message1.setText("Reply to chat: " + message1.getReplyToMessageId());
                 bot.sendQueue.add(message1);
-                break;
+                break;*/
         }
         return "";
     }
@@ -93,7 +93,7 @@ public class SystemHandler extends AbstractHandler {
                 text.append("[/ticket](/ticket) - создать обращение").append(END_LINE);
                 text.append("[/close_ticket](/close_ticket) - закрыть обращение").append(END_LINE);
             }
-            if (user.isAdmin()) {
+            if (user.isAdmin() || user.isMaster()) {
                 text.append("[/users](/users) - показать список неавторизированых пользователей").append(END_LINE);
                 text.append("[/register_user](/register_user) + user id - зарегистрировать сотрудника").append(END_LINE);
             }
@@ -101,12 +101,16 @@ public class SystemHandler extends AbstractHandler {
                 text.append("[/register_admin](/register_admin) + user id - зарегистрировать администратора").append(END_LINE);
             }
         } else {
-            text.append("[/register](/register) - отправить запрос на регистрацию").append(END_LINE);
+//            text.append("[/register](/register) - отправить запрос на регистрацию").append(END_LINE);
         }
 
         text.append("[/about_me](/about_me) - узнать информацию о себе").append(END_LINE);
 
 //        text.append("/*notify* _time-in-sec_  - receive notification from me after the specified time").append(END_LINE);
+
+        ReplyKeyboardRemove remove = new ReplyKeyboardRemove();
+        remove.setRemoveKeyboard(true);
+        sendMessage.setReplyMarkup(remove);
 
         sendMessage.setText(text.toString());
         return sendMessage;
@@ -127,21 +131,20 @@ public class SystemHandler extends AbstractHandler {
         text.append("Что бы узнать чем я могу помочь, воспользуйтесь командой [/help](/help)");
         sendMessage.setText(text.toString());
 
-        //TODO Кнопка регистрации
-//        KeyboardButton keyboardButton = new KeyboardButton();
-//        keyboardButton.setText("Зарегистрироваться");
-//        keyboardButton.setRequestContact(true);
-//
-//        List<KeyboardRow> keyboard = new ArrayList<>();
-//        KeyboardRow keyboardRow = new KeyboardRow();
-//        keyboardRow.add(keyboardButton);
-//        keyboard.add(keyboardRow);
-//
-//        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
-//        keyboardMarkup.setResizeKeyboard(true);
-//        keyboardMarkup.setKeyboard(keyboard);
-//
-//        sendMessage.setReplyMarkup(keyboardMarkup);
+        KeyboardButton keyboardButton = new KeyboardButton();
+        keyboardButton.setText("Зарегистрироваться");
+        keyboardButton.setRequestContact(true);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow keyboardRow = new KeyboardRow();
+        keyboardRow.add(keyboardButton);
+        keyboard.add(keyboardRow);
+
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setKeyboard(keyboard);
+
+        sendMessage.setReplyMarkup(keyboardMarkup);
 
         return sendMessage;
     }
@@ -171,24 +174,35 @@ public class SystemHandler extends AbstractHandler {
         } else {
             text.append("не зарегистрированы.");
         }
+
+        ReplyKeyboardRemove remove = new ReplyKeyboardRemove();
+        remove.setRemoveKeyboard(true);
+        sendMessage.setReplyMarkup(remove);
+
         sendMessage.setText(text.toString());
         return sendMessage;
     }
 
-    private SendMessage getMessageUsers(String chatID) {
+    private SendMessage getMessageUsers(String chatID, Integer userId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatID);
         StringBuilder text = new StringBuilder();
         List<User> users = bot.userDao.findAllNotAuthorized();
 
-        if (!users.isEmpty()) {
-            for (User user : users) {
-                text.append(user.getFirstName()).append(DELIMITER);
-                text.append(user.getLastName()).append(DELIMITER);
-                text.append(user.getUserId());
+        User fromUser = bot.userDao.findUserById(userId);
+
+        if (fromUser != null && (fromUser.isAdmin() || fromUser.isMaster())) {
+            if (!users.isEmpty()) {
+                for (User user : users) {
+                    if (user.getFirstName() != null) text.append(user.getFirstName()).append(DELIMITER);
+                    if (user.getLastName() != null) text.append(user.getLastName()).append(DELIMITER);
+                    text.append(user.getUserId()).append(END_LINE);
+                }
+            } else {
+                text.append("Нет неавторизированых пользователей.");
             }
         } else {
-            text.append("Нет неавторизированых пользователей.");
+            text.append("Извините, вы не можете воспользоваться данной командой.");
         }
 
         sendMessage.setText(text.toString());

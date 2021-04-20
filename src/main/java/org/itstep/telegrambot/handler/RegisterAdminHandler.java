@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.itstep.domain.entity.User;
 import org.itstep.telegrambot.Bot;
 import org.itstep.telegrambot.command.ParsedCommand;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public class RegisterAdminHandler extends AbstractHandler {
@@ -16,26 +17,36 @@ public class RegisterAdminHandler extends AbstractHandler {
 
     @Override
     public String operate(String chatId, ParsedCommand parsedCommand, Update update) {
-        Integer fromUserId = update.getMessage().getFrom().getId();
+        User fromUser = bot.userDao.findUserById(update.getMessage().getFrom().getId());
         Integer id;
+        User user;
         try {
             id = Integer.parseInt(parsedCommand.getText());
+            user = bot.userDao.findUserById(id);
         } catch (Exception e) {
             return "Введен не верный user id.";
         }
+        String text = "Пользователь c id: " + id + ",";
 
-        String text = "Пользователь с id " + update.getMessage().getFrom().getId();
-
-        String response;
-        if (bot.userDao.isMaster(fromUserId)) {
-            if (bot.userDao.isExist(id)) {
-                if (!bot.userDao.isAdmin(id)) {
-                    User user = bot.userDao.findUserById(id);
-                    user.setAdmin(true);
-                    bot.userDao.update(user);
-                    return text + " зарегистрирован, как администратор.";
+        if (fromUser != null && fromUser.isMaster()) {
+            if (user != null) {
+                if (!user.isAdmin()) {
+                    user.setUser(false);
+                    user.setAdmin(false);
+                    user.setMaster(true);
+                    try {
+                        bot.userDao.update(user);
+                        SendMessage message = new SendMessage();
+                        message.setText("Мастер зарегистрировал вас как администратора.");
+                        message.setChatId(id.toString());
+                        bot.sendQueue.add(message);
+                        return text + " зарегистрирован как администратор";
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                        return "Ошибка регистрации администратора.";
+                    }
                 } else {
-                    return text + " уже зарегистрирован, как администратор.";
+                    return text + " уже зарегистрирован как администратор.";
                 }
             } else {
                 return text + " не найден.";
