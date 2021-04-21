@@ -43,7 +43,7 @@ public class MessageReceiver implements Runnable {
     private void analyze(Object object) {
         if (object instanceof Update) {
             Update update = (Update) object;
-//            log.info("Update recieved: " + update.toString());
+            log.debug("Update received: " + update.toString());
             if (update.getMessage() != null) {
                 analyzeForUpdateType(update);
             }

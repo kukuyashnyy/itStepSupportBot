@@ -41,29 +41,34 @@ public class DefaultHandler extends AbstractHandler {
                 ticket = bot.ticketDao.findByDateAndMessageToId(update.getMessage().getForwardDate(),
                         update.getMessage().getForwardFromMessageId());
                 if (ticket != null) {
-                    log.info("New ticketId: " + ticket.getId());
+                    log.debug("New ticketId: " + ticket.getId());
                     ticket.setMessageToId(update.getMessage().getMessageId());
                     bot.ticketDao.update(ticket);
                 }
                 break;
             case CHANNEL:
-                ticket = bot.ticketDao.findByMessageToId(update.getMessage().getReplyToMessage().getMessageId());
-                //owner of channel
-                if (update.getMessage().getFrom().getUserName() != null &&
-                        update.getMessage().getFrom().getUserName().equals(GROUP_ANONYMOUS_BOT)) {
-                    log.info("Is from owner");
-                    sendAnswer(update, ticket);
-                    break;
-                }
-                //admin
-                if (user != null && (user.isAdmin() || user.isMaster())) {
-                    log.info("Is from admin");
-                    sendAnswer(update, ticket);
-                } else {
-                    if (ticket != null) {
-                        bot.sendQueue.add(getMessageToNotAdminFromChannel(ticket));
+                try {
+                    ticket = bot.ticketDao.findByMessageToId(update.getMessage().getReplyToMessage().getMessageId());
+                    //owner of channel
+                    if (update.getMessage().getFrom().getUserName() != null &&
+                            update.getMessage().getFrom().getUserName().equals(GROUP_ANONYMOUS_BOT)) {
+                        log.debug("Is from owner");
+                        sendAnswer(update, ticket);
+                        break;
                     }
+                    //admin
+                    if (user != null && (user.isAdmin() || user.isMaster())) {
+                        log.debug("Is from admin");
+                        sendAnswer(update, ticket);
+                    } else {
+                        if (ticket != null) {
+                            bot.sendQueue.add(getMessageToNotAdminFromChannel(ticket));
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                 }
+
                 break;
             case USER:
                 ticket = bot.ticketDao.findByUserIdAndOpenedAndNotClosed(update.getMessage().getFrom().getId());
@@ -92,18 +97,18 @@ public class DefaultHandler extends AbstractHandler {
     private FromWho analyzeFrom(Update update, User user) {
         Integer userId = update.getMessage().getFrom().getId();
         if (userId.equals(TELEGRAM_ID)) {
-            log.info("Is from telegram");
+            log.debug("Is from telegram");
             return FromWho.TELEGRAM;
         }
         if (update.getMessage().getChatId().equals(Long.parseLong(GROUP_ID))) {
-            log.info("Is from channel");
+            log.debug("Is from channel");
             return FromWho.CHANNEL;
         }
         if (user != null) {
-            log.info("Is from user");
+            log.debug("Is from user");
             return FromWho.USER;
         } else {
-            log.info("Is from anonymous");
+            log.debug("Is from anonymous");
             return FromWho.ANONYMOUS;
         }
 
