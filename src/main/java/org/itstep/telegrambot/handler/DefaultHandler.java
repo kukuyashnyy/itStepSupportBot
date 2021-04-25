@@ -118,8 +118,7 @@ public class DefaultHandler extends AbstractHandler {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setReplyToMessageId(ticket.getMessageToId());
         sendMessage.setChatId(String.valueOf(GROUP_ID));
-        sendMessage.enableHtml(true);
-        sendMessage.setText("Bot:" + END_LINE + "<s>Данное обращение закрыто пользователем.</s>");
+        sendMessage.setText("Данное обращение закрыто пользователем.");
         return sendMessage;
     }
 
